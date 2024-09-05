@@ -73,12 +73,17 @@ def download_csv():
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        reg_num = request.form['reg_num']
+        reg_num = request.form['reg_num'].lower()  # Convert input registration number to lowercase
         password = request.form['password']
-        if reg_num in users and users[reg_num] == password:
+        
+        # Convert stored registration numbers to lowercase for comparison
+        normalized_users = {k.lower(): v for k, v in users.items()}
+        
+        # Check if the registration number is in users (case-insensitive check)
+        if reg_num in normalized_users and normalized_users[reg_num] == password:
             records = download_csv()
             for record in records:
-                if record["Roll Number"] == reg_num:
+                if record["Roll Number"].lower() == reg_num:  # Compare with lowercase
                     attendance = {date: status for date, status in record.items() if date not in ["Name", "Roll Number"]}
                     total_present = sum(1 for status in attendance.values() if status == 'P')
                     total_absent = sum(1 for status in attendance.values() if status == '')
